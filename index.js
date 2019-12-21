@@ -1,6 +1,9 @@
 const stream = require('stream')
 const DEBUG = false
 
+/**
+* TODO: Duplex instead of Transform for better backpressure handling
+*/
 
 class DelimSplit extends stream.Transform {
 
@@ -117,7 +120,7 @@ class ReSplit extends stream.Transform {
  *
  */
 
-class CharSplit extends stream.Transform {
+class CharSplit extends stream.Duplex {
 
     constructor(opts) {
         opts = Object.assign({delimiter:"\n"}, opts)
@@ -130,7 +133,7 @@ class CharSplit extends stream.Transform {
     }
 
 
-    _transform( data, enc, cb ) {
+    _write( data, enc, cb ) {
         //console.log( 'RECCNT', ++this.reccnt, 'bufflen', this.buffered.length  )
         let lines = []
         let idx = 0, start = 0
@@ -139,7 +142,7 @@ class CharSplit extends stream.Transform {
             if( idx < 0 ) {
                 let remainder = data.slice( start, data.length )
                 this.remainder.push( remainder )
-                cb(null)
+                this.buffered.unshift( { cb: cb } )
                 return
             }
             //console.log( idx, data[idx], data.toString() )
@@ -151,13 +154,32 @@ class CharSplit extends stream.Transform {
             }
             ++this.lines
             start = ++idx
-            this.emit('data', line )
+            this.buffered.unshift( { line: line } )
+        }
+    }
+ 
+    _read(sz) {
+        for( let elt = this.buffered.pop(); elt && sz > 0; elt = this.buffered.pop() ) {
+           if( elt.cb ) {
+              elt.cb(null)
+           } else {
+              this.push( elt.line )
+              sz -= elt.line.length 
+           }
         }
     }
 
     end() {
+        for( let elt = this.buffered.pop(); elt; elt = this.buffered.pop() ) {
+           if( elt.cb ) {
+              elt.cb(null)
+           } else {
+              this.emit( 'data', elt.line )
+           }
+        }
+     
         this.remainder.length && this.emit( 'data', Buffer.concat(this.remainder) )
-        super.end()
+        this.emit('end')
     }
 }
 

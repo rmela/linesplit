@@ -27,7 +27,7 @@ function failLog( testcase, original, result ) {
  */
 class Capture extends stream.Writable {
     constructor( joinstring ) {
-        super();
+        super({ highWaterMark:1});
 
         this.joinstring = Buffer.from(joinstring);
         this.accumulator = [];
