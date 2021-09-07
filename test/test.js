@@ -121,9 +121,9 @@ const MAX_HIGH_WATER_MARK = 1000 // test buffer sizes from 1 through max hwm
 
 let eol = { pattern: "\n", joinstring: "\n" }
 CASES = [
-  //{ name: 'Fail'      , klass: Fail      , delimiters: [ eol ]   , maxHighWaterMark: 1, expectFailure: true },
-  //{ name: 'DelimSplit', klass: DelimSplit, delimiters: DELIMS    , maxHighWaterMark: MAX_HIGH_WATER_MARK },
-  //{ name: 'ReSplit'   , klass: ReSplit   , delimiters: REGEX     , maxHighWaterMark: MAX_HIGH_WATER_MARK },
+  { name: 'Fail'      , klass: Fail      , delimiters: [ eol ]   , maxHighWaterMark: 1, expectFailure: true },
+  { name: 'DelimSplit', klass: DelimSplit, delimiters: DELIMS    , maxHighWaterMark: MAX_HIGH_WATER_MARK },
+  { name: 'ReSplit'   , klass: ReSplit   , delimiters: REGEX     , maxHighWaterMark: MAX_HIGH_WATER_MARK },
   { name: 'CharSplit' , klass: CharSplit , delimiters: CHARDELIMS, maxHighWaterMark: MAX_HIGH_WATER_MARK }
 ]
 
